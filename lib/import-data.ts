@@ -23,8 +23,12 @@ export type ReviewRow = {
     text: string;
     published_at: string;
     updated_at: string;
-    reply_text: string | null;
-    replied_at: string | null;
+};
+
+export type ReplyRow = {
+    id: string;
+    reply_text: string;
+    replied_at: string;
 };
 
 export type SkippedReview = { id: string; reason: string };
@@ -34,6 +38,7 @@ export function prepareImport(data: RawData) {
     const { reviews, duplicates } = keepLatestVersion(data.reviews);
 
     const rows: ReviewRow[] = [];
+    const replies: ReplyRow[] = [];
     const skipped: SkippedReview[] = [];
 
     for (const review of reviews) {
@@ -42,12 +47,14 @@ export function prepareImport(data: RawData) {
             continue;
         }
         rows.push(toRow(review));
+        if (review.reply) replies.push(toReply(review.id, review.reply));
     }
 
     return {
         restaurants: data.restaurants,
         locations: data.locations,
         reviews: rows,
+        replies,
         skipped,
         duplicates,
     };
@@ -78,7 +85,9 @@ function toRow(review: RawReview): ReviewRow {
         text: review.text ?? "",
         published_at: review.published_at,
         updated_at: review.updated_at,
-        reply_text: review.reply?.text ?? null,
-        replied_at: review.reply?.replied_at ?? null,
     };
+}
+
+function toReply(id: string, reply: NonNullable<RawReview["reply"]>): ReplyRow {
+    return { id, reply_text: reply.text, replied_at: reply.replied_at };
 }
