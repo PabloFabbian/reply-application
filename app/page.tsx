@@ -25,7 +25,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <SummaryCards summaries={summaries} locations={locations} activeLocationId={filters.location} />
       <FilterBar locations={locations} filters={filters} />
       <div className="transition-opacity group-has-[[data-pending]]:opacity-50">
-        <ReviewList reviews={reviews} locations={locations} aiEnabled={isAiConfigured()} />
+        <ReviewList reviews={reviews} locations={locations} aiEnabled={isAiConfigured()} status={filters.status} />
       </div>
     </main>
   );

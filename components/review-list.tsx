@@ -1,16 +1,18 @@
 import { formatDate } from "@/lib/format";
 import type { Location, Review } from "@/lib/reviews";
 import { ReplyForm } from "@/components/reply-form";
+import type { StatusFilter } from "@/lib/filters";
 
 type ReviewListProps = {
     reviews: Review[];
     locations: Location[];
     aiEnabled: boolean;
+    status: StatusFilter;
 };
 
-export function ReviewList({ reviews, locations, aiEnabled }: ReviewListProps) {
+export function ReviewList({ reviews, locations, aiEnabled, status }: ReviewListProps) {
     if (reviews.length === 0) {
-        return <p className="py-12 text-center text-sm text-neutral-500">Ninguna reseña coincide con estos filtros.</p>;
+        return <p className="py-12 text-center text-sm text-neutral-500">{emptyMessage(status)}</p>;
     }
 
     const locationNames = new Map(
@@ -57,4 +59,10 @@ function ReviewCard({ review, locationName, aiEnabled }: { review: Review; locat
             )}
         </li>
     );
+}
+
+function emptyMessage(status: StatusFilter) {
+    if (status === "pending") return "No hay reseñas pendientes con estos filtros. Todo al día.";
+    if (status === "answered") return "No hay reseñas respondidas con estos filtros.";
+    return "Ninguna reseña coincide con estos filtros.";
 }
