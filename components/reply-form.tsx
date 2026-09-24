@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { primaryButton, secondaryButton } from "@/components/button-styles";
+const SAVED_MESSAGE_MS = 2000;
 
 type ReplyFormProps = {
     reviewId: string;
@@ -18,6 +19,7 @@ export function ReplyForm({ reviewId, aiEnabled }: ReplyFormProps) {
     const [generating, setGenerating] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [saved, setSaved] = useState(false);
 
     const busy = generating || saving;
 
@@ -45,17 +47,26 @@ export function ReplyForm({ reviewId, aiEnabled }: ReplyFormProps) {
 
         const result = await post(`/api/reviews/${reviewId}/reply`, { text });
         if (result.ok) {
-            router.refresh();
-        } else {
-            setError(result.error);
+            setSaved(true);
+            setTimeout(() => router.refresh(), SAVED_MESSAGE_MS);
+            return;
         }
 
+        setError(result.error);
         setSaving(false);
     }
 
     function handleChange(value: string) {
         setText(value);
         if (draftStatus === "fresh") setDraftStatus("edited");
+    }
+
+    if (saved) {
+        return (
+            <p className="mt-3 text-sm font-medium text-emerald-700 motion-safe:animate-fade-in">
+                Respuesta guardada.
+            </p>
+        );
     }
 
     return (
