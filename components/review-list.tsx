@@ -1,7 +1,7 @@
-import { formatDate } from "@/lib/format";
-import type { Location, Review } from "@/lib/reviews";
 import { ReplyForm } from "@/components/reply-form";
 import type { StatusFilter } from "@/lib/filters";
+import { formatDate } from "@/lib/format";
+import type { Location, Review } from "@/lib/reviews";
 
 type ReviewListProps = {
     reviews: Review[];
@@ -42,7 +42,7 @@ function ReviewCard({ review, locationName, aiEnabled }: { review: Review; locat
             </div>
 
             <p className="text-sm text-neutral-500">
-                {locationName} · {review.rating ? `${review.rating} ★` : "Sin calificación"}
+                {locationName} · <RatingLabel rating={review.rating} />
             </p>
 
             <p className="mt-2">
@@ -59,6 +59,11 @@ function ReviewCard({ review, locationName, aiEnabled }: { review: Review; locat
             )}
         </li>
     );
+}
+
+function RatingLabel({ rating }: { rating: number | null }) {
+    if (rating === null) return <span>Sin calificación</span>;
+    return <span className={rating < 3 ? "font-medium text-red-700" : ""}>{rating} ★</span>;
 }
 
 function emptyMessage(status: StatusFilter) {
