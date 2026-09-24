@@ -10,6 +10,7 @@ export type LocationSummary = {
     locationId: string;
     name: string;
     total: number;
+    pending: number;
     averageRating: number | null;
     answeredPercent: number | null;
 };
@@ -30,6 +31,7 @@ function summarizeLocation(location: SummaryLocation, reviews: SummaryReview[]):
         locationId: location.id,
         name: location.name,
         total: reviews.length,
+        pending: reviews.length - answered,
         averageRating: averageRating(reviews),
         answeredPercent: reviews.length === 0 ? null : (answered / reviews.length) * 100,
     };

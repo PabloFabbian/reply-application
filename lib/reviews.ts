@@ -1,5 +1,6 @@
 import { createServerClient } from "@/lib/supabase";
 import type { Filters } from "@/lib/filters";
+import type { SummaryReview } from "@/lib/summary";
 
 export type Location = {
     id: string;
@@ -57,6 +58,15 @@ export async function getReviews(filters: Filters): Promise<Review[]> {
     const { data, error } = await query;
     if (error) throw new Error(`No se pudieron leer las reseñas: ${error.message}`);
 
+    return data;
+}
+
+export async function getSummaryReviews(): Promise<SummaryReview[]> {
+    const supabase = createServerClient();
+
+    const { data, error } = await supabase.from("reviews").select("location_id, rating, reply_text");
+
+    if (error) throw new Error(`No se pudo leer el resumen: ${error.message}`);
     return data;
 }
 

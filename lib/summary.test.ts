@@ -16,6 +16,7 @@ describe("summarizeLocations", () => {
         );
 
         expect(summary.total).toBe(4);
+        expect(summary.pending).toBe(3);
         expect(summary.averageRating).toBe(3);
         expect(summary.answeredPercent).toBe(25);
     });
@@ -24,6 +25,7 @@ describe("summarizeLocations", () => {
         const [summary] = summarizeLocations([belgrano], []);
 
         expect(summary.total).toBe(0);
+        expect(summary.pending).toBe(0);
         expect(summary.averageRating).toBeNull();
         expect(summary.answeredPercent).toBeNull();
     });
