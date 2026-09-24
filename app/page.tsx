@@ -49,12 +49,7 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         <div className="transition-opacity duration-200 group-has-[[data-pending]]:opacity-70 group-has-[[data-pending]]:delay-150">
-          <ReviewList
-            reviews={reviews}
-            locations={locations}
-            aiEnabled={isAiConfigured()}
-            status={filters.status}
-          />
+          <ReviewList reviews={reviews} locations={locations} aiEnabled={isAiConfigured()} filters={filters} />
         </div>
       </section>
     </main>

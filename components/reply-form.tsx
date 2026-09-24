@@ -91,13 +91,19 @@ export function ReplyForm({ reviewId, aiEnabled }: ReplyFormProps) {
 
             {error && <p className="text-sm text-red-700">{error}</p>}
 
-            <div className="flex flex-wrap gap-2">
-                <button type="submit" disabled={busy || text.trim() === ""} className={primaryButton}>
-                    {saving ? "Guardando…" : "Guardar respuesta"}
+            <div className="flex justify-end gap-2">
+                <button
+                    type="button"
+                    onClick={handleDraft}
+                    disabled={busy || !aiEnabled}
+                    className={secondaryButton}
+                >
+                    <SparkIcon />
+                    {draftButtonLabel(aiEnabled, generating, draftStatus)}
                 </button>
 
-                <button type="button" onClick={handleDraft} disabled={busy || !aiEnabled} className={secondaryButton}>
-                    {draftButtonLabel(aiEnabled, generating, draftStatus)}
+                <button type="submit" disabled={busy || text.trim() === ""} className={primaryButton}>
+                    {saving ? "Guardando…" : "Guardar"}
                 </button>
             </div>
         </form>
@@ -105,10 +111,10 @@ export function ReplyForm({ reviewId, aiEnabled }: ReplyFormProps) {
 }
 
 function draftButtonLabel(aiEnabled: boolean, generating: boolean, draftStatus: DraftStatus) {
-    if (!aiEnabled) return "Borrador con IA no disponible";
-    if (generating) return "Generando borrador…";
-    if (draftStatus !== "none") return "Pedir otro borrador";
-    return "Pedir borrador con IA";
+    if (!aiEnabled) return "IA no disponible";
+    if (generating) return "Generando…";
+    if (draftStatus !== "none") return "Otro borrador";
+    return "Borrador con IA";
 }
 
 async function post(url: string, payload?: unknown) {
@@ -127,4 +133,15 @@ async function post(url: string, payload?: unknown) {
     } catch {
         return { ok: false as const, error: "No hay conexión. Revisá tu internet y probá de nuevo." };
     }
+}
+
+function SparkIcon() {
+    return (
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0">
+            <path
+                d="M8 1.5l1.4 3.6 3.6 1.4-3.6 1.4L8 11.5 6.6 7.9 3 6.5l3.6-1.4zM12.5 10.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z"
+                fill="currentColor"
+            />
+        </svg>
+    );
 }
