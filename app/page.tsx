@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { FilterBar } from "@/components/filter-bar";
 import { ReviewList } from "@/components/review-list";
@@ -5,11 +6,18 @@ import { SummaryCards } from "@/components/summary-cards";
 import { isAiConfigured } from "@/lib/ai";
 import { parseFilters, type SearchParams } from "@/lib/filters";
 import { getLocations, getReviews, getSummaryReviews } from "@/lib/reviews";
-import { summarizeLocations } from "@/lib/summary";
+import { summarizeLocations, type LocationSummary } from "@/lib/summary";
 
 type HomeProps = {
   searchParams: Promise<SearchParams>;
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [locations, summaryReviews] = await Promise.all([getLocations(), getSummaryReviews()]);
+  const pending = totalPending(summarizeLocations(locations, summaryReviews));
+
+  return { title: `ReplyApp | ${pending === 0 ? "Todo al día" : `${pending} sin responder`}` };
+}
 
 export default async function Home({ searchParams }: HomeProps) {
   const filters = parseFilters(await searchParams);
@@ -19,7 +27,7 @@ export default async function Home({ searchParams }: HomeProps) {
     getSummaryReviews(),
   ]);
   const summaries = summarizeLocations(locations, summaryReviews);
-  const pendingTotal = summaries.reduce((sum, summary) => sum + summary.pending, 0);
+  const pendingTotal = totalPending(summaries);
 
   return (
     <main className="group mx-auto w-full max-w-3xl space-y-8 px-4 py-8 motion-safe:animate-fade-in">
@@ -54,6 +62,10 @@ export default async function Home({ searchParams }: HomeProps) {
       </section>
     </main>
   );
+}
+
+function totalPending(summaries: LocationSummary[]) {
+  return summaries.reduce((sum, summary) => sum + summary.pending, 0);
 }
 
 function Headline({ pending }: { pending: number }) {

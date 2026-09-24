@@ -1,6 +1,7 @@
-import { createServerClient } from "@/lib/supabase";
+import { cache } from "react";
 import type { Filters } from "@/lib/filters";
 import type { SummaryReview } from "@/lib/summary";
+import { createServerClient } from "@/lib/supabase";
 
 export type Location = {
     id: string;
@@ -19,7 +20,7 @@ export type Review = {
     replied_at: string | null;
 };
 
-export async function getLocations(): Promise<Location[]> {
+export const getLocations = cache(async (): Promise<Location[]> => {
     const supabase = createServerClient();
 
     const [locations, restaurants] = await Promise.all([
@@ -37,7 +38,7 @@ export async function getLocations(): Promise<Location[]> {
         name: location.name,
         restaurantName: restaurantNames.get(location.restaurant_id) ?? "",
     }));
-}
+});
 
 export async function getReviews(filters: Filters): Promise<Review[]> {
     const supabase = createServerClient();
@@ -61,14 +62,14 @@ export async function getReviews(filters: Filters): Promise<Review[]> {
     return data;
 }
 
-export async function getSummaryReviews(): Promise<SummaryReview[]> {
+export const getSummaryReviews = cache(async (): Promise<SummaryReview[]> => {
     const supabase = createServerClient();
 
     const { data, error } = await supabase.from("reviews").select("location_id, rating, reply_text");
 
     if (error) throw new Error(`No se pudo leer el resumen: ${error.message}`);
     return data;
-}
+});
 
 export type DraftSource = {
     restaurantName: string;

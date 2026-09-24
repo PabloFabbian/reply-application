@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Reseñas",
-  description: "Bandeja de reseñas por sede",
+  title: "ReplyApp",
+  description: "Bandeja de reseñas por sede, con borradores de respuesta generados por IA.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
