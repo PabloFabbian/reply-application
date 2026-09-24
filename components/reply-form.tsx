@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { primaryButton, secondaryButton } from "@/components/button-styles";
 
 type ReplyFormProps = {
     reviewId: string;
@@ -9,10 +10,6 @@ type ReplyFormProps = {
 };
 
 type DraftStatus = "none" | "fresh" | "edited";
-
-const buttonBase = "rounded-md px-3 py-1.5 text-sm disabled:opacity-40";
-const primaryButton = `${buttonBase} bg-neutral-900 text-white`;
-const secondaryButton = `${buttonBase} border border-neutral-300 bg-white`;
 
 export function ReplyForm({ reviewId, aiEnabled }: ReplyFormProps) {
     const router = useRouter();
