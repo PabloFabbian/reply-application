@@ -1,6 +1,6 @@
 import { Avatar } from "@/components/avatar";
 import { ReplyForm } from "@/components/reply-form";
-import { glass, insetPanel } from "@/components/surface-styles";
+import { insetPanel, litSurface, raisedGlass } from "@/components/surface-styles"; 
 import type { Filters, StatusFilter } from "@/lib/filters";
 import { formatDate } from "@/lib/format";
 import type { Location, Review } from "@/lib/reviews";
@@ -66,7 +66,7 @@ function ReviewCard({
 
     return (
         <li
-            className={`overflow-hidden rounded-xl border bg-surface/75 motion-safe:animate-fade-in ${glass} ${isAnswered ? "border-white/80" : "border-accent-line"
+            className={`overflow-hidden rounded-xl border motion-safe:animate-fade-in ${litSurface} ${raisedGlass} ${isAnswered ? "border-white/85" : "border-accent-line"
                 }`}
             style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
         >

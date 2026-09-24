@@ -21,12 +21,12 @@ html {
 }
 
 @theme {
-  --color-canvas: #faf8f5;
+  --color-canvas: #ebe4d9;
   --color-surface: #ffffff;
-  --color-line: #e7e2da;
-  --color-line-strong: #d6cfc5;
+  --color-line: #d9d1c4;
+  --color-line-strong: #c9bfb0;
   --color-ink: #1c1917;
-  --color-ink-muted: #78716c;
+  --color-ink-muted: #57534e;
   --color-accent: #6d5bd0;
   --color-accent-soft: #f3f0fd;
   --color-accent-line: #d9d2f7;
@@ -64,8 +64,10 @@ html {
 
 body {
   background-color: var(--color-canvas);
-  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
-  background-size: 16px 16px;
+  background-image:
+    radial-gradient(circle at 92% 0%, rgb(150 176 214 / 0.55), transparent 40%),
+    radial-gradient(circle at 0% 65%, rgb(236 190 150 / 0.4), transparent 45%);
+  background-attachment: fixed;
   color: var(--color-ink);
 }
 
@@ -124,5 +126,11 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }

@@ -58,7 +58,7 @@ export function FilterBar({ locations, filters }: FilterBarProps) {
                             type="button"
                             aria-pressed={selected}
                             onClick={() => updateFilter("status", option.value)}
-                            className={`relative rounded px-3 text-sm whitespace-nowrap transition-colors duration-200 ${selected ? "text-canvas" : "text-ink-muted hover:text-ink"
+                            className={`relative rounded px-3 text-sm whitespace-nowrap transition-colors duration-200 hover:cursor-pointer ${selected ? "text-canvas" : "text-ink-muted hover:text-ink"
                                 }`}
                         >
                             {option.label}
@@ -106,7 +106,7 @@ type SelectProps = {
 
 function Select({ label, value, onChange, children }: SelectProps) {
     return (
-        <div className="relative grow sm:grow-0">
+        <div className="relative grow sm:grow-0 hover:cursor-pointer">
             <select
                 aria-label={label}
                 value={value}

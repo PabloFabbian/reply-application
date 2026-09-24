@@ -3,7 +3,7 @@ import { formatAverage, formatPercent } from "@/lib/format";
 import type { Location } from "@/lib/reviews";
 import type { LocationSummary } from "@/lib/summary";
 import { LinkPending } from "@/components/link-pending";
-import { glass } from "@/components/surface-styles";
+import { glass, interactiveGlass, litSurface } from "@/components/surface-styles";
 
 type SummaryCardsProps = {
     summaries: LocationSummary[];
@@ -21,7 +21,7 @@ export function SummaryCards({ summaries, locations, activeLocationId }: Summary
                     key={summary.locationId}
                     href={`/?location=${summary.locationId}&status=pending`}
                     scroll={false}
-                    className={`block rounded-lg p-4 transition-[border-color,box-shadow,background-color] duration-200 has-[[data-pending]]:border-accent ${cardClass(summary, activeLocationId)}`}
+                    className={`block rounded-lg p-4 has-[[data-pending]]:border-accent ${cardClass(summary, activeLocationId)}`}
                 >
                     <LinkPending />
                     <p className="text-xs text-ink-muted">{restaurantNames.get(summary.locationId)}</p>
@@ -60,12 +60,12 @@ export function SummaryCards({ summaries, locations, activeLocationId }: Summary
 
 function cardClass(summary: LocationSummary, activeLocationId: string | null) {
     if (summary.locationId === activeLocationId) {
-        return `border border-accent bg-surface/70 ring-1 ring-accent ${glass}`;
+        return `border border-accent ring-1 ring-accent ${litSurface} ${glass}`;
     }
     if (summary.total === 0) {
-        return "border border-dashed border-line-strong bg-canvas/40 backdrop-blur-sm hover:bg-surface/50";
+        return "border border-dashed border-white/80 bg-surface/15 backdrop-blur-md";
     }
-    return `border border-white/80 bg-surface/40 hover:bg-surface/70 ${glass}`;
+    return `border border-white/75 ${litSurface} ${interactiveGlass}`;
 }
 
 const statTones = {

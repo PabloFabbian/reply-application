@@ -3,7 +3,7 @@ import { formatLongDate } from "@/lib/format";
 
 export function AppHeader() {
     return (
-        <header className="sticky top-0 z-20 border-b border-line/70 bg-canvas/75 backdrop-blur-md">
+        <header className="sticky top-0 z-20 border-b border-white/60 bg-surface/35 backdrop-blur-md">
             <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-4">
                 <Link
                     href="/"
