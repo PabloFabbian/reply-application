@@ -1,5 +1,6 @@
 import { formatDate } from "@/lib/format";
 import type { Location, Review } from "@/lib/reviews";
+import { ReplyForm } from "@/components/reply-form";
 
 type ReviewListProps = {
     reviews: Review[];
@@ -40,11 +41,13 @@ function ReviewCard({ review, locationName }: { review: Review; locationName: st
                 {review.text || <span className="text-neutral-400 italic">Sin comentario</span>}
             </p>
 
-            {review.reply_text && review.replied_at && (
+            {review.reply_text && review.replied_at ? (
                 <div className="mt-3 border-l-2 border-neutral-300 pl-3 text-sm">
                     <p className="text-neutral-500">Respondida el {formatDate(review.replied_at)}</p>
                     <p className="mt-1">{review.reply_text}</p>
                 </div>
+            ) : (
+                <ReplyForm reviewId={review.id} />
             )}
         </li>
     );

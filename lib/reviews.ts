@@ -59,3 +59,28 @@ export async function getReviews(filters: Filters): Promise<Review[]> {
 
     return data;
 }
+
+export type SaveReplyResult = "saved" | "not_found" | "already_answered";
+
+export async function saveReply(id: string, text: string): Promise<SaveReplyResult> {
+    const supabase = createServerClient();
+
+    const { data, error } = await supabase
+        .from("reviews")
+        .update({ reply_text: text, replied_at: new Date().toISOString() })
+        .eq("id", id)
+        .is("reply_text", null)
+        .select("id");
+
+    if (error) throw new Error(`No se pudo guardar la respuesta: ${error.message}`);
+    if (data.length > 0) return "saved";
+
+    const { data: existing, error: readError } = await supabase
+        .from("reviews")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (readError) throw new Error(`No se pudo leer la reseña: ${readError.message}`);
+    return existing ? "already_answered" : "not_found";
+}
