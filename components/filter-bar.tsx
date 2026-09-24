@@ -43,7 +43,7 @@ export function FilterBar({ locations, filters }: FilterBarProps) {
             <div
                 role="group"
                 aria-label="Estado"
-                className="relative grid h-9 grid-cols-3 rounded-md border border-line bg-surface p-0.5"
+                className="relative grid h-9 grid-cols-3 rounded-md border border-line bg-surface p-0.5 grow sm:grow-0"
             >
                 <span
                     aria-hidden="true"
@@ -106,12 +106,12 @@ type SelectProps = {
 
 function Select({ label, value, onChange, children }: SelectProps) {
     return (
-        <div className="relative">
+        <div className="relative grow sm:grow-0">
             <select
                 aria-label={label}
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
-                className="select h-9 appearance-none rounded-md border border-line bg-surface pr-8 pl-3 text-sm whitespace-nowrap text-ink transition-colors hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                className="select h-9 appearance-none rounded-md border border-line bg-surface pr-8 pl-3 text-sm whitespace-nowrap text-ink transition-colors hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent w-full"
             >
                 {children}
             </select>
