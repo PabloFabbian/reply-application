@@ -1,23 +1,21 @@
-# Bandeja de reseñas
+# ReplyApp
 
-Herramienta para que un grupo gastronómico conteste sus reseñas de Google: importa el archivo exportado, muestra lo que falta responder por sede, genera un borrador con IA y guarda la respuesta.
+Bandeja de reseñas para un grupo gastronómico con dos restaurantes y tres sedes. Importa las reseñas desde un archivo, muestra qué falta responder, genera un borrador con IA que la persona edita antes de guardar y resume cada sede.
 
-**Demo:** [completar con la URL de Vercel]
+**Demo:** https://replyapplication.vercel.app
+
+![Vista principal](docs/screenshots/inbox.png)
 
 ## Stack
 
-- **Next.js 16** (App Router, TypeScript) con Tailwind CSS escrito a mano
-- **Supabase** (Postgres, plan gratuito)
-- **[completar proveedor de IA]** para los borradores
-- **Vitest** para los tests
-- **Vercel** para el deploy
+Next.js 16 con TypeScript y Tailwind, Supabase, Groq para los borradores, Vitest para los tests y Vercel para el deploy.
 
 ## Levantarlo desde cero
 
 Requisitos: Node 22 o superior y un proyecto en Supabase.
 
-1. Correr `supabase/schema.sql` en el **SQL Editor** de Supabase para crear las tablas.
-2. Después, en la terminal:
+1. Correr `supabase/schema.sql` en el **SQL Editor** de Supabase.
+2. En la terminal:
 
 ```bash
 npm install
@@ -26,100 +24,50 @@ npm run import
 npm run dev
 ```
 
-La app queda en http://localhost:3000.
+La app queda en http://localhost:3000. Los tests se corren con `npm test`.
 
 ## Variables de entorno
 
 | Variable | Para qué sirve | Dónde se consigue |
 | --- | --- | --- |
-| `SUPABASE_URL` | URL del proyecto de Supabase | Supabase → Project Settings → Data API |
-| `SUPABASE_SECRET_KEY` | Llave secreta (equivale a `service_role`). Solo se usa en el servidor | Supabase → Project Settings → API Keys |
-| [completar] | Llave del modelo de IA | [completar] |
+| `SUPABASE_URL` | URL del proyecto | Supabase → Project Settings → Data API |
+| `SUPABASE_SECRET_KEY` | Llave secreta de la base. Solo se usa en el servidor | Supabase → Project Settings → API Keys |
+| `GROQ_API_KEY` | Llave para generar borradores. Opcional | console.groq.com → API Keys |
 
-Ninguna lleva el prefijo `NEXT_PUBLIC_`, así que Next nunca las incluye en el código que llega al navegador. En Vercel, la llave secreta está marcada como *Sensitive*.
-
-## Comandos
-
-| Comando | Qué hace |
-| --- | --- |
-| `npm run dev` | Levanta la app en modo desarrollo |
-| `npm run import` | Importa `data/reviews.json` a Supabase. Se puede correr las veces que sea |
-| `npm test` | Corre los tests |
-| `npm run build` | Compila para producción |
-
-## Estructura
-
-```
-app/
-  page.tsx            la única pantalla
-components/
-  filter-bar.tsx      filtros (único componente de cliente)
-  review-list.tsx     lista de reseñas
-lib/
-  import-data.ts      limpieza del JSON antes de importar (pura)
-  summary.ts          resumen por sede (pura, con tests)
-  filters.ts          lectura de filtros desde la URL (pura)
-  reviews.ts          consultas a Supabase
-  supabase.ts         cliente de Supabase del lado del servidor
-  format.ts           formato de fechas
-scripts/
-  import.ts           comando de importación
-supabase/
-  schema.sql          tablas, RLS y permisos
-data/
-  reviews.json        archivo original
-```
-
-La lógica de negocio (`import-data`, `summary`, `filters`) no conoce ni la base ni la UI. `reviews.ts` es el único archivo de la app que habla con Supabase.
+Las llaves nunca llegan al navegador: todo pasa por el servidor. Sin `GROQ_API_KEY`, la app funciona igual y el botón de borrador avisa que la IA no está disponible.
 
 ## Decisiones sobre los datos
 
-Cada caso sucio del archivo tiene una regla explícita. Hay tres tipos: resolver, aceptar y representar, o rechazar e informar.
-
 | Caso | Qué hace la app | Por qué |
 | --- | --- | --- |
-| **rv-205 duplicada** | Queda la versión con `updated_at` más nuevo (3 estrellas). La importación informa el duplicado | Es la edición posterior del mismo cliente. Las fechas se comparan como fechas, no como texto |
-| **rv-108 sin calificación** | Se guarda con `rating` nulo. Cuenta en el total de la sede pero no en el promedio. En la lista dice "Sin calificación" y se puede filtrar | Es una reseña real que hay que responder, pero no tiene un número para promediar |
-| **rv-105 sin texto** | Se guarda con texto vacío. En la lista dice "Sin comentario" | Una calificación sola también merece respuesta |
-| **rv-301, sede `loc-99` inexistente** | No se importa. La importación la lista como salteada con el motivo. Nunca crea la sede | Crear una sede inventada ensuciaría el resumen. Además, la clave foránea en la base la rechazaría igual |
-| **Belgrano sin reseñas** | Aparece en el resumen con "Sin reseñas todavía", sin promedio ni porcentaje | Un promedio de 0 o un 0% respondido serían falsos |
-| **Reseñas ya respondidas en el archivo** | Se importan como respondidas, con su texto y su fecha | Son respuestas reales |
-| **Reimportar después de responder desde la app** | La respuesta del archivo solo se escribe si la reseña no tiene una | Así una reimportación nunca pisa lo que alguien contestó en la pantalla |
+| **rv-205 duplicada** | Queda la versión más nueva (3 estrellas) | Es la edición posterior del mismo cliente |
+| **rv-108 sin calificación** | Cuenta en el total de la sede, pero no en el promedio. Dice "Sin calificación" | Hay que responderla, pero no tiene un número para promediar |
+| **rv-105 sin texto** | Se guarda igual y dice "Sin comentario" | Una calificación sola también merece respuesta |
+| **rv-301, sede inexistente** | No se importa, y la importación avisa cuál salteó y por qué | Inventar una sede ensuciaría el resumen |
+| **Belgrano sin reseñas** | Muestra "Sin reseñas todavía" en vez de un promedio | Un promedio de 0 sería falso |
+| **Reseñas ya respondidas** | Entran como respondidas, con su texto y su fecha | Son respuestas reales |
 
-Con estos datos, Palermo tiene 9 reseñas y promedio 3,63 sobre 8 calificadas, y Centro tiene 6 reseñas y promedio 3,67.
+La importación se puede correr muchas veces sin duplicar nada, y nunca pisa una respuesta guardada desde la app.
 
-## Otras decisiones
+## Decisiones de diseño
 
-- **El navegador nunca habla con Supabase.** Todas las lecturas y escrituras pasan por el servidor de Next con la llave secreta. RLS está activado en todas las tablas y sin políticas, así que la llave pública no puede leer ni escribir nada. Los permisos se dan a mano en `schema.sql`, porque desactivé la exposición automática de tablas nuevas.
-- **La respuesta vive en la tabla `reviews`** (`reply_text` y `replied_at`), no en una tabla aparte. Cada reseña tiene como mucho una respuesta. Una restricción impide que quede texto sin fecha o fecha sin texto.
-- **La importación es idempotente** porque usa los ids del archivo como clave primaria y hace upsert. Correrla dos veces deja la base igual.
-- **Por defecto se muestran las reseñas sin responder.** La rutina es entrar y contestar lo pendiente. "Todas" está a un clic.
-- **Los filtros viven en la URL** y se combinan. Un valor inválido (`?rating=9`) se ignora en vez de romper la página.
-- **Las fechas se muestran en hora de Buenos Aires** ("16 de septiembre"), porque Vercel corre en UTC y una reseña de la noche aparecería con fecha del día siguiente.
-- **El resumen devuelve números sin redondear.** Redondear es trabajo de la pantalla, así los tests prueban la regla y no el formato.
-- **Solo modo claro.** Saqué el modo oscuro automático de la plantilla para tener un único esquema de color consistente.
-- **`@types/node` en 22**, para coincidir con la versión de Node del proyecto (y porque Vitest 5 lo pide).
+- **Pensada para la rutina de la mañana.** Por defecto muestra lo que falta responder, y el titular y la pestaña del navegador dicen cuántas quedan.
+- **Cada color tiene un solo significado:** rojo para calificaciones bajas, ámbar para borradores sin guardar, verde para guardado y violeta para lo pendiente. El resto son neutros.
+- **El borrador se nota como borrador:** el campo se pone ámbar y dice *Borrador generado con IA · todavía no se guardó*.
+- **El tono del borrador depende de la calificación:** disculpas para 1 y 2 estrellas, agradecimiento para 4 y 5.
+- **Los filtros quedan en la URL**, así un link filtrado se puede compartir.
+- **La tarjeta no repite lo que el filtro ya dice:** filtrando por sede, la sede desaparece de cada tarjeta.
 
-## Tests
+## Qué no llegué a hacer
 
-```bash
-npm test
-```
-
-Cubren la función del resumen (`lib/summary.ts`): el caso normal, la sede sin reseñas, la reseña sin calificación, la sede donde ninguna reseña tiene calificación y que cada sede cuente solo lo suyo.
-
-Usan datos chicos e inventados a propósito. Prueban la regla ("una sede vacía no tiene promedio"), no la salida actual del JSON, que cambiaría con cada reseña nueva.
-
-## Qué no llegué a hacer y cómo lo haría
-
-- **Validar la forma del JSON al importar.** Hoy se confía en que el archivo tiene la estructura esperada. Lo haría con un esquema de Zod antes de `prepareImport`.
-- **Comparar versiones contra la base.** Si un archivo viejo trae una reseña con `updated_at` anterior al que ya está guardado, hoy la pisa. Lo resolvería actualizando solo cuando la fecha del archivo es más nueva.
-- **Tipos generados de Supabase.** Hoy los tipos de las filas están escritos a mano. Con `supabase gen types` se sincronizarían con el esquema, y se podrían usar consultas anidadas tipadas.
-- **Tests de `prepareImport` y `parseFilters`.** Son funciones puras, así que se testean igual que el resumen.
-- **Paginación del listado**, necesaria si el volumen de reseñas crece.
-- **Autenticación.** El ejercicio no la pide; hoy cualquiera con la URL puede responder.
-- [completar si quedó algo más afuera]
+- **Ordenar por urgencia**, con las reseñas de 1 y 2 estrellas sin responder arriba.
+- **Editar una respuesta ya guardada.**
+- **Mostrar quién escribió cada respuesta:** la IA, la IA editada o una persona.
+- **Un tono distinto para cada restaurante** en los borradores.
+- **Modo oscuro.**
 
 ## Capturas
 
-[completar con 2 o 3 capturas de la pantalla]
+| Borrador con IA | Celular |
+| --- | --- |
+| ![Borrador generado](docs/screenshots/draft.png) | ![Vista en celular](docs/screenshots/mobile.png) |
