@@ -3,58 +3,119 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-export function ReplyForm({ reviewId }: { reviewId: string }) {
+type ReplyFormProps = {
+    reviewId: string;
+    aiEnabled: boolean;
+};
+
+type DraftStatus = "none" | "fresh" | "edited";
+
+const buttonBase = "rounded-md px-3 py-1.5 text-sm disabled:opacity-40";
+const primaryButton = `${buttonBase} bg-neutral-900 text-white`;
+const secondaryButton = `${buttonBase} border border-neutral-300 bg-white`;
+
+export function ReplyForm({ reviewId, aiEnabled }: ReplyFormProps) {
     const router = useRouter();
     const [text, setText] = useState("");
+    const [draftStatus, setDraftStatus] = useState<DraftStatus>("none");
+    const [generating, setGenerating] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const busy = generating || saving;
+
+    async function handleDraft() {
+        if (text.trim() !== "" && !window.confirm("¿Reemplazar lo que escribiste por un borrador nuevo?")) return;
+
+        setGenerating(true);
+        setError(null);
+
+        const result = await post(`/api/reviews/${reviewId}/draft`);
+        if (result.ok) {
+            setText(result.body.draft);
+            setDraftStatus("fresh");
+        } else {
+            setError(result.error);
+        }
+
+        setGenerating(false);
+    }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setSaving(true);
         setError(null);
 
-        try {
-            const response = await fetch(`/api/reviews/${reviewId}/reply`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text }),
-            });
-
-            if (!response.ok) {
-                const body = await response.json().catch(() => null);
-                setError(body?.error ?? "No se pudo guardar la respuesta.");
-                return;
-            }
-
+        const result = await post(`/api/reviews/${reviewId}/reply`, { text });
+        if (result.ok) {
             router.refresh();
-        } catch {
-            setError("No hay conexión. Revisá tu internet y probá de nuevo.");
-        } finally {
-            setSaving(false);
+        } else {
+            setError(result.error);
         }
+
+        setSaving(false);
+    }
+
+    function handleChange(value: string) {
+        setText(value);
+        if (draftStatus === "fresh") setDraftStatus("edited");
     }
 
     return (
         <form onSubmit={handleSubmit} className="mt-3 space-y-2">
+            {draftStatus !== "none" && (
+                <p className="text-xs font-medium text-amber-800">
+                    {draftStatus === "fresh" ? "Borrador generado con IA" : "Borrador de IA editado"} · todavía no se guardó
+                </p>
+            )}
+
             <textarea
                 aria-label="Respuesta"
-                className="w-full rounded-md border border-neutral-300 p-2 text-sm"
+                className={`w-full rounded-md border p-2 text-sm ${draftStatus === "none" ? "border-neutral-300" : "border-amber-300 bg-amber-50"
+                    }`}
                 rows={3}
-                placeholder="Escribí tu respuesta…"
+                placeholder="Escribí tu respuesta o pedí un borrador…"
                 value={text}
-                onChange={(event) => setText(event.target.value)}
+                disabled={generating}
+                onChange={(event) => handleChange(event.target.value)}
             />
 
             {error && <p className="text-sm text-red-700">{error}</p>}
 
-            <button
-                type="submit"
-                disabled={saving || text.trim() === ""}
-                className="rounded-md bg-neutral-900 px-3 py-1.5 text-sm text-white disabled:opacity-40"
-            >
-                {saving ? "Guardando…" : "Guardar respuesta"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+                <button type="submit" disabled={busy || text.trim() === ""} className={primaryButton}>
+                    {saving ? "Guardando…" : "Guardar respuesta"}
+                </button>
+
+                <button type="button" onClick={handleDraft} disabled={busy || !aiEnabled} className={secondaryButton}>
+                    {draftButtonLabel(aiEnabled, generating, draftStatus)}
+                </button>
+            </div>
         </form>
     );
+}
+
+function draftButtonLabel(aiEnabled: boolean, generating: boolean, draftStatus: DraftStatus) {
+    if (!aiEnabled) return "Borrador con IA no disponible";
+    if (generating) return "Generando borrador…";
+    if (draftStatus !== "none") return "Pedir otro borrador";
+    return "Pedir borrador con IA";
+}
+
+async function post(url: string, payload?: unknown) {
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        const body = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            return { ok: false as const, error: body?.error ?? "Algo salió mal. Probá de nuevo." };
+        }
+        return { ok: true as const, body };
+    } catch {
+        return { ok: false as const, error: "No hay conexión. Revisá tu internet y probá de nuevo." };
+    }
 }

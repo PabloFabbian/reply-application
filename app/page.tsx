@@ -2,6 +2,7 @@ import { FilterBar } from "@/components/filter-bar";
 import { ReviewList } from "@/components/review-list";
 import { parseFilters, type SearchParams } from "@/lib/filters";
 import { getLocations, getReviews } from "@/lib/reviews";
+import { isAiConfigured } from "@/lib/ai";
 
 type HomeProps = {
   searchParams: Promise<SearchParams>;
@@ -15,7 +16,7 @@ export default async function Home({ searchParams }: HomeProps) {
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-8">
       <h1 className="text-xl font-semibold">Reseñas</h1>
       <FilterBar locations={locations} filters={filters} />
-      <ReviewList reviews={reviews} locations={locations} />
+      <ReviewList reviews={reviews} locations={locations} aiEnabled={isAiConfigured()}/>
     </main>
   );
 }

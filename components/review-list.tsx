@@ -5,9 +5,10 @@ import { ReplyForm } from "@/components/reply-form";
 type ReviewListProps = {
     reviews: Review[];
     locations: Location[];
+    aiEnabled: boolean;
 };
 
-export function ReviewList({ reviews, locations }: ReviewListProps) {
+export function ReviewList({ reviews, locations, aiEnabled }: ReviewListProps) {
     if (reviews.length === 0) {
         return <p className="py-12 text-center text-sm text-neutral-500">Ninguna reseña coincide con estos filtros.</p>;
     }
@@ -19,13 +20,18 @@ export function ReviewList({ reviews, locations }: ReviewListProps) {
     return (
         <ul className="space-y-3">
             {reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} locationName={locationNames.get(review.location_id) ?? ""} />
+                <ReviewCard
+                    key={review.id}
+                    review={review}
+                    locationName={locationNames.get(review.location_id) ?? ""}
+                    aiEnabled={aiEnabled}
+                />
             ))}
         </ul>
     );
 }
 
-function ReviewCard({ review, locationName }: { review: Review; locationName: string }) {
+function ReviewCard({ review, locationName, aiEnabled }: { review: Review; locationName: string; aiEnabled: boolean }) {
     return (
         <li className="rounded-lg border border-neutral-200 bg-white p-4">
             <div className="flex items-baseline justify-between gap-4">
@@ -47,7 +53,7 @@ function ReviewCard({ review, locationName }: { review: Review; locationName: st
                     <p className="mt-1">{review.reply_text}</p>
                 </div>
             ) : (
-                <ReplyForm reviewId={review.id} />
+                <ReplyForm reviewId={review.id} aiEnabled={aiEnabled} />
             )}
         </li>
     );

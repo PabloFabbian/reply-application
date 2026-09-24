@@ -60,6 +60,38 @@ export async function getReviews(filters: Filters): Promise<Review[]> {
     return data;
 }
 
+export type DraftSource = {
+    restaurantName: string;
+    author: string;
+    rating: number | null;
+    text: string;
+    isAnswered: boolean;
+};
+
+export async function getReviewForDraft(id: string): Promise<DraftSource | null> {
+    const supabase = createServerClient();
+
+    const { data: review, error } = await supabase
+        .from("reviews")
+        .select("location_id, author, rating, text, reply_text")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (error) throw new Error(`No se pudo leer la reseña: ${error.message}`);
+    if (!review) return null;
+
+    const locations = await getLocations();
+    const location = locations.find((item) => item.id === review.location_id);
+
+    return {
+        restaurantName: location?.restaurantName ?? "",
+        author: review.author,
+        rating: review.rating,
+        text: review.text,
+        isAnswered: review.reply_text !== null,
+    };
+}
+
 export type SaveReplyResult = "saved" | "not_found" | "already_answered";
 
 export async function saveReply(id: string, text: string): Promise<SaveReplyResult> {
