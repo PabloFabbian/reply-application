@@ -63,24 +63,25 @@ export function ReplyForm({ reviewId, aiEnabled }: ReplyFormProps) {
 
     if (saved) {
         return (
-            <p className="mt-3 text-sm font-medium text-emerald-700 motion-safe:animate-fade-in">
+            <p className="font-mono text-sm text-emerald-700 motion-safe:animate-fade-in">
                 Respuesta guardada.
             </p>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className="mt-3 space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-2">
             {draftStatus !== "none" && (
-                <p className="text-xs font-medium text-amber-800">
+                <p className="font-mono text-xs text-amber-800">
                     {draftStatus === "fresh" ? "Borrador generado con IA" : "Borrador de IA editado"} · todavía no se guardó
                 </p>
             )}
 
             <textarea
                 aria-label="Respuesta"
-                className={`w-full rounded-md border p-2 text-sm ${draftStatus === "none" ? "border-neutral-300" : "border-amber-300 bg-amber-50"
-                    }`}
+                className={`w-full rounded-md border p-2 text-sm placeholder:text-ink-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                    draftStatus === "none" ? "border-line bg-surface" : "border-amber-300 bg-amber-50"
+                }`}
                 rows={3}
                 placeholder="Escribí tu respuesta o pedí un borrador…"
                 value={text}

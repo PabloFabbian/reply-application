@@ -1,8 +1,53 @@
 @import "tailwindcss";
 
+html {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border: 3px solid var(--color-canvas);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-muted);
+}
+
+@theme {
+  --color-canvas: #faf8f5;
+  --color-surface: #ffffff;
+  --color-line: #e7e2da;
+  --color-line-strong: #d6cfc5;
+  --color-ink: #1c1917;
+  --color-ink-muted: #78716c;
+  --color-accent: #6d5bd0;
+  --color-accent-soft: #f3f0fd;
+  --color-accent-line: #d9d2f7;
+  --color-avatar: #d6c4ac;
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
-  --animate-fade-in: fade-in 250ms ease-out;
+  --font-mono: var(--font-geist-mono);
+  --animate-fade-in: fade-in 250ms ease-out both;
+  --animate-progress: progress 900ms ease-in-out infinite;
+
+  @keyframes progress {
+    from {
+      transform: translateX(-100%);
+    }
+
+    to {
+      transform: translateX(300%);
+    }
+  }
 
   @keyframes fade-in {
     from {
@@ -18,6 +63,66 @@
 }
 
 body {
-  background: #fafafa;
-  color: #171717;
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 16px 16px;
+  color: var(--color-ink);
+}
+
+@supports (appearance: base-select) {
+
+  .select,
+  .select::picker(select) {
+    appearance: base-select;
+  }
+
+  .select {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .select::picker-icon {
+    display: none;
+  }
+
+  .select::picker(select) {
+    margin-top: 4px;
+    padding: 4px;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: var(--color-surface);
+    box-shadow: 0 8px 24px rgb(28 25 23 / 0.08);
+    animation: picker-in 150ms ease-out;
+  }
+
+  .select option {
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .select option:hover,
+  .select option:focus-visible {
+    background: var(--color-canvas);
+  }
+
+  .select option:checked {
+    font-weight: 500;
+  }
+
+  .select option::checkmark {
+    color: var(--color-accent);
+  }
+}
+
+@keyframes picker-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
