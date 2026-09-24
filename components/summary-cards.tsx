@@ -20,6 +20,7 @@ export function SummaryCards({ summaries, locations, activeLocationId }: Summary
                 <Link
                     key={summary.locationId}
                     href={`/?location=${summary.locationId}&status=pending`}
+                    scroll={false}
                     className={`block rounded-lg p-4 transition-[border-color,box-shadow,background-color] duration-200 has-[[data-pending]]:border-accent ${cardClass(summary, activeLocationId)}`}
                 >
                     <LinkPending />

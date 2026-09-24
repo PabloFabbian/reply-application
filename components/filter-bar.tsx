@@ -32,7 +32,7 @@ export function FilterBar({ locations, filters }: FilterBarProps) {
 
         startTransition(() => {
             setCurrent(parseFilters(Object.fromEntries(params)));
-            router.push(`/?${params}`);
+            router.push(`/?${params}`, { scroll: false });
         });
     }
 
