@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import type { Filters } from "@/lib/filters";
 import type { Location } from "@/lib/reviews";
 
@@ -13,6 +14,7 @@ const selectClass = "rounded-md border border-neutral-300 bg-white px-3 py-2 tex
 
 export function FilterBar({ locations, filters }: FilterBarProps) {
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
 
     function updateFilter(key: keyof Filters, value: string) {
         const next = {
@@ -22,11 +24,11 @@ export function FilterBar({ locations, filters }: FilterBarProps) {
             [key]: value,
         };
         const params = new URLSearchParams(Object.entries(next).filter(([, v]) => v !== ""));
-        router.push(`/?${params}`);
+        startTransition(() => router.push(`/?${params}`));
     }
 
     return (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" data-pending={isPending ? "" : undefined}>
             <select
                 aria-label="Estado"
                 className={selectClass}
@@ -66,6 +68,10 @@ export function FilterBar({ locations, filters }: FilterBarProps) {
                 ))}
                 <option value="none">Sin calificación</option>
             </select>
+
+            <span className="sr-only" aria-live="polite">
+                {isPending ? "Actualizando reseñas…" : ""}
+            </span>
         </div>
     );
 }
