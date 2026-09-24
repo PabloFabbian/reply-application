@@ -18,10 +18,14 @@ export default async function Home({ searchParams }: HomeProps) {
     getSummaryReviews(),
   ]);
   const summaries = summarizeLocations(locations, summaryReviews);
+  const pendingTotal = summaries.reduce((sum, summary) => sum + summary.pending, 0);
 
   return (
     <main className="group mx-auto w-full max-w-3xl space-y-6 px-4 py-8 motion-safe:animate-fade-in">
-      <h1 className="text-xl font-semibold">Reseñas</h1>
+      <header className="flex items-baseline gap-3">
+        <h1 className="text-xl font-semibold">Reseñas</h1>
+        <p className="text-sm text-neutral-500 tabular-nums">{pendingLabel(pendingTotal)}</p>
+      </header>
       <SummaryCards summaries={summaries} locations={locations} activeLocationId={filters.location} />
       <FilterBar locations={locations} filters={filters} />
       <div className="transition-opacity group-has-[[data-pending]]:opacity-50">
@@ -29,4 +33,9 @@ export default async function Home({ searchParams }: HomeProps) {
       </div>
     </main>
   );
+}
+
+function pendingLabel(count: number) {
+  if (count === 0) return "Todo al día";
+  return `${count} sin responder`;
 }
